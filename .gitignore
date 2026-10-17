@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+artifacts/
+Local.Paths.props
+*.user
+*.suo
+.vs/
+*.dll
+*.pdb
+*.log

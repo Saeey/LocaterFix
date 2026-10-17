@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <GameManaged>C:/Games/Risk of Rain 2/Risk of Rain 2_Data/Managed</GameManaged>
+    <BepInExCore>C:/ModProfiles/RiskOfRain2/Default/BepInEx/core</BepInExCore>
+  </PropertyGroup>
+</Project>

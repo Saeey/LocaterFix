@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>LocaterFix</AssemblyName>
+    <RootNamespace>ForNull.LocaterFix</RootNamespace>
+    <Version>1.0.0</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>5</LangVersion>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <ProjectRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\'))</ProjectRoot>
+    <PackageVersion>1.0.1</PackageVersion>
+    <PackageStaging>$(ProjectRoot)artifacts\staging\</PackageStaging>
+    <PackageZip>$(ProjectRoot)artifacts\for_null-Locater_Fix-$(PackageVersion).zip</PackageZip>
+  </PropertyGroup>
+
+  <!-- Optional machine-local paths; this file is excluded from Git. -->
+  <Import Project="$(ProjectRoot)Local.Paths.props" Condition="Exists('$(ProjectRoot)Local.Paths.props')" />
+
+  <Target Name="CheckLocalReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameManaged)/RoR2.dll')" Text="Set GameManaged to your Risk of Rain 2_Data/Managed directory." />
+    <Error Condition="!Exists('$(BepInExCore)/BepInEx.dll')" Text="Set BepInExCore to your mod profile's BepInEx/core directory." />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="LocaterFixPlugin.cs" />
+    <Reference Include="BepInEx"><HintPath>$(BepInExCore)/BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(BepInExCore)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="RoR2"><HintPath>$(GameManaged)/RoR2.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameManaged)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameManaged)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(GameManaged)/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(GameManaged)/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- Deliberate allowlist: source files, scripts, references, logs and local paths
+       can never be swept into the Thunderstore ZIP by a recursive copy. -->
+  <Target Name="PackageRelease" DependsOnTargets="Build">
+    <PropertyGroup>
+      <ReleaseBinary Condition="'$(ReleaseBinary)' == ''">$(TargetPath)</ReleaseBinary>
+      <CanonicalStaging>$([System.IO.Path]::GetFullPath('$(PackageStaging)'))</CanonicalStaging>
+      <ExpectedStaging>$([System.IO.Path]::GetFullPath('$(ProjectRoot)artifacts\staging\'))</ExpectedStaging>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(ReleaseBinary)')" Text="ReleaseBinary does not exist: $(ReleaseBinary)" />
+    <Error Condition="'$(CanonicalStaging)' != '$(ExpectedStaging)'" Text="PackageStaging must stay in this project's artifacts/staging directory." />
+    <ItemGroup>
+      <PackageDocument Include="$(ProjectRoot)thunderstore/manifest.json;$(ProjectRoot)thunderstore/README.md;$(ProjectRoot)thunderstore/CHANGELOG.md;$(ProjectRoot)thunderstore/icon.png;$(ProjectRoot)LICENSE;$(ProjectRoot)VALIDATION.md" />
+    </ItemGroup>
+    <RemoveDir Directories="$(PackageStaging)" />
+    <MakeDir Directories="$(PackageStaging);$(PackageStaging)plugins" />
+    <Copy SourceFiles="@(PackageDocument)" DestinationFolder="$(PackageStaging)" />
+    <Copy SourceFiles="$(ReleaseBinary)" DestinationFiles="$(PackageStaging)plugins/LocaterFix.dll" />
+    <ZipDirectory SourceDirectory="$(PackageStaging)" DestinationFile="$(PackageZip)" Overwrite="true" />
+    <Message Importance="high" Text="Thunderstore package: $(PackageZip)" />
+  </Target>
+</Project>

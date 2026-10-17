@@ -1,0 +1,10 @@
+{
+  "name": "Locater_Fix",
+  "version_number": "1.0.1",
+  "website_url": "https://github.com/Saeey/LocaterFix",
+  "description": "Unofficial fix for Locater 1.3.5: stops marker error spam and removes test chest spawns. 需启用原版 Locater；修复标记持续刷错及遗留测试箱子。1.0.1 仅调整打包。",
+  "dependencies": [
+    "Hyru-Locater-1.3.5",
+    "bbepis-BepInExPack-5.4.2122"
+  ]
+}
